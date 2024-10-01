@@ -7,6 +7,7 @@ public class BackgroundColorSwapper : MonoBehaviour
     public GameObject sprite1; // Assign the first background sprite in the Inspector
     public GameObject sprite2; // Assign the second background sprite in the Inspector
     public GameObject[] blackObstacles; // Assign black obstacles (squares) in Inspector
+    public GameObject[] whiteObstacles; // Assign white obstacles (squares) in Inspector
 
     private SpriteRenderer spriteRenderer1;
     private SpriteRenderer spriteRenderer2;
@@ -23,6 +24,8 @@ public class BackgroundColorSwapper : MonoBehaviour
         {
             Debug.LogError("Please assign both sprites to the script in the Inspector.");
         }
+
+        UpdateObstacleColliders();
     }
 
     void Update()
@@ -61,6 +64,24 @@ public class BackgroundColorSwapper : MonoBehaviour
                 collider.enabled = !isBackgroundBlack; // Disable colliders if the background is black, enable if it is not
             }
         }
+
+        foreach (GameObject obstacle in whiteObstacles)
+        {
+            Collider2D collider = obstacle.GetComponent<Collider2D>();
+            if (collider != null)
+            {
+                collider.enabled = isBackgroundBlack; // Disable colliders if the background is black, enable if it is not
+            }
+        }
+    }
+
+    // Method to check if the current background is black
+    public bool IsBackgroundBlack()
+    {
+        if (spriteRenderer1 != null)
+        {
+            return spriteRenderer1.color == Color.black;
+        }
+        return false;
     }
 }
-
