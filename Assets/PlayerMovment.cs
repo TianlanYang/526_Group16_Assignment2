@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour
     public float speed = 5.0f; // Speed of the player
     public float jumpForce = 2.0f; // Force of the jump
     private bool isGrounded; // Is the player on the ground?
+    private bool canJumpFromObstacle;
     private Rigidbody2D rb;
     private Vector3 originalPosition;
     public BackgroundColorSwapper colorSwapScript; // Reference to the BackgroundColorSwapper script
@@ -32,9 +33,13 @@ public class PlayerController : MonoBehaviour
         transform.Translate(movement * speed * Time.deltaTime);
 
         // Jumping
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        if (Input.GetKeyDown(KeyCode.Space) && (isGrounded || canJumpFromObstacle))
         {
             GetComponent<Rigidbody2D>().AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
+            if (canJumpFromObstacle && !isGrounded)
+            {
+                canJumpFromObstacle = false;
+            }
             isGrounded = false; // Player is now in the air
         }
     }
@@ -60,6 +65,15 @@ public class PlayerController : MonoBehaviour
             }
         }
 
+        if (collision.gameObject.tag == "Blacktrap")
+        {
+                if (colorSwapScript != null && !colorSwapScript.IsBackgroundBlack())
+                {
+                    Debug.Log("Player touched Blacktrap while the background is white. Resetting position.");
+                    ResetPosition(); // Reset player to the original position
+                }
+        }
+
         // Check if the collided object is the red flag to stop movement
         if (collision.gameObject.tag == "RedFlag")
         {
@@ -79,11 +93,25 @@ public class PlayerController : MonoBehaviour
                 ResetPosition(); // Reset player to the original position
             }
         }
+
+        if (collision.gameObject.tag == "Blacktrap")
+        {
+            if (colorSwapScript != null && !colorSwapScript.IsBackgroundBlack())
+            {
+                Debug.Log("Player is staying on Blacktrap while the background is black. Resetting position.");
+                ResetPosition(); // Reset player to the original position
+            }
+        }
     }
 
     private void ResetPosition()
     {
         rb.velocity = Vector2.zero;  // Stop the player's movement immediately
         transform.position = originalPosition;
+    }
+
+    public void SetJumpAllowed(bool allowed)
+    {
+        canJumpFromObstacle = allowed;
     }
 }
