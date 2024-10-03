@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;  // Import SceneManagement to load the next level
 
 public class PlayerController : MonoBehaviour
 {
@@ -53,7 +54,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // Trigger event when the player first enters the Whitetrap
+    // Trigger event when the player first enters the trap or flag
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.tag == "Whitetrap")
@@ -67,18 +68,19 @@ public class PlayerController : MonoBehaviour
 
         if (collision.gameObject.tag == "Blacktrap")
         {
-                if (colorSwapScript != null && !colorSwapScript.IsBackgroundBlack())
-                {
-                    Debug.Log("Player touched Blacktrap while the background is white. Resetting position.");
-                    ResetPosition(); // Reset player to the original position
-                }
+            if (colorSwapScript != null && !colorSwapScript.IsBackgroundBlack())
+            {
+                Debug.Log("Player touched Blacktrap while the background is white. Resetting position.");
+                ResetPosition(); // Reset player to the original position
+            }
         }
 
-        // Check if the collided object is the red flag to stop movement
+        // Check if the collided object is the red flag to stop movement and jump to the next level
         if (collision.gameObject.tag == "RedFlag")
         {
             speed = 0f;
             rb.velocity = Vector2.zero;  // Stop the player's movement
+            LoadNextLevel(); // Call method to load the next level
         }
     }
 
@@ -113,5 +115,22 @@ public class PlayerController : MonoBehaviour
     public void SetJumpAllowed(bool allowed)
     {
         canJumpFromObstacle = allowed;
+    }
+
+    private void LoadNextLevel()
+    {
+        // Get the current active scene index and load the next scene
+        int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
+        int nextSceneIndex = currentSceneIndex + 1;
+
+        // Check if the next scene index is within the bounds of your scenes
+        if (nextSceneIndex < SceneManager.sceneCountInBuildSettings)
+        {
+            SceneManager.LoadScene(nextSceneIndex);
+        }
+        else
+        {
+            Debug.Log("No more levels to load. This is the last level.");
+        }
     }
 }
